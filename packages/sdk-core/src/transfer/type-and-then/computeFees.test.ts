@@ -203,4 +203,22 @@ describe('computeAllFees', () => {
     expect(isAssetEqual).toHaveBeenCalledWith(feeAssetInfo, feeAssetInfo)
     expect(result).toEqual({ hopFees: 10n, destFee: 5n })
   })
+
+  it('does not add edDeposit twice when edDeposit is present in context', async () => {
+    const feeDetail: TXcmFeeDetail = { fee: 0n, feeType: 'dryRun', asset: context.assetInfo }
+    const destinationFee = 1500n
+
+    vi.mocked(getXcmFeeInternal).mockResolvedValue({
+      success: true,
+      origin: feeDetail,
+      destination: { ...feeDetail, fee: destinationFee },
+      hops: []
+    })
+
+    const edDeposit = 500n
+    const result = await computeAllFees({ ...context, edDeposit }, buildTx)
+
+    expect(padValueBy).toHaveBeenCalledWith(destinationFee, FEE_PADDING)
+    expect(result).toEqual({ hopFees: 0n, destFee: destinationFee })
+  })
 })
