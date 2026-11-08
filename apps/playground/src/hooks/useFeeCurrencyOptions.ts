@@ -3,6 +3,7 @@ import { getAssetsImpl, isAssetEqual, isExternalChain } from '@paraspell/sdk';
 import { useMemo } from 'react';
 
 import { useCustomChains } from './useCustomChains';
+import { getCurrencyOptionKey } from './useCurrencyOptions';
 
 export const useFeeCurrencyOptions = (from: TChain, to: TChain) => {
   const { customChainAssets } = useCustomChains();
@@ -24,7 +25,7 @@ export const useFeeCurrencyOptions = (from: TChain, to: TChain) => {
   const currencyMap = useMemo(
     () =>
       supportedAssets.reduce((map: Record<string, TAssetInfo>, asset) => {
-        const key = `${asset.symbol ?? 'NO_SYMBOL'}-${!asset.isNative ? asset.assetId : 'NO_ID'}`;
+        const key = getCurrencyOptionKey(asset);
         map[key] = asset;
         return map;
       }, {}),

@@ -37,12 +37,11 @@ export const useActiveCurrencyOptions = (
     [from, to, swapActive, exchange],
   );
 
-  // Invalidate currency selections when swap exchange changes
+  // Invalidate currency selections when chain or currency options change
   useEffect(() => {
-    if (!swapActive) return;
     form.values.currencies.forEach((currency, index) => {
       if (!currency.isCustomCurrency && currency.currencyOptionId) {
-        const isOptionStillValid = swapCurrencyFromOptions.some(
+        const isOptionStillValid = activeCurrencyOptions.some(
           (option) => option.value === currency.currencyOptionId,
         );
         if (!isOptionStillValid) {
@@ -50,7 +49,7 @@ export const useActiveCurrencyOptions = (
         }
       }
     });
-  }, [isSwapActive, swapCurrencyFromOptions]);
+  }, [from, to, activeCurrencyOptions]);
 
   return {
     activeCurrencyOptions,

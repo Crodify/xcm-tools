@@ -4,6 +4,14 @@ import { useMemo } from 'react';
 
 import { useCustomChains } from './useCustomChains';
 
+export const getCurrencyOptionKey = (asset: TAssetInfo) => {
+  const id = !asset.isNative
+    ? (asset.assetId ??
+      (asset.location ? JSON.stringify(asset.location) : 'NO_ID'))
+    : 'NO_ID';
+  return `${asset.symbol ?? 'NO_SYMBOL'}-${id}`;
+};
+
 export const useCurrencyOptions = (from: TChain, to: TChain) => {
   const isNotParaToPara = isRelayChain(from) || isRelayChain(to);
 
@@ -17,7 +25,7 @@ export const useCurrencyOptions = (from: TChain, to: TChain) => {
   const currencyMap = useMemo(
     () =>
       supportedAssets.reduce((map: Record<string, TAssetInfo>, asset) => {
-        const key = `${asset.symbol ?? 'NO_SYMBOL'}-${!asset.isNative ? asset.assetId : 'NO_ID'}`;
+        const key = getCurrencyOptionKey(asset);
         map[key] = asset;
         return map;
       }, {}),
