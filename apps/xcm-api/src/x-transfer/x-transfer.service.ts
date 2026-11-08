@@ -10,6 +10,7 @@ import {
   TPapiApi,
   TPapiSigner,
   TPapiTransaction,
+  TCustomChainsMap,
   TTransferBaseOptionsWithSender,
   TTransferBaseOptionsWithSwap,
 } from '@paraspell/sdk';
@@ -106,6 +107,7 @@ export class XTransferService {
   private buildXTransfer(
     builder: ReturnType<typeof Builder>,
     transfer: XTransferDto | EvmXTransferDto,
+    batchCustomChains?: TCustomChainsMap,
   ) {
     const {
       from,
@@ -124,8 +126,10 @@ export class XTransferService {
       options,
     } = transfer;
 
-    assertChain(from, options?.customChains);
-    assertDestination(to, options?.customChains);
+    const customChains = options?.customChains ?? batchCustomChains;
+
+    assertChain(from, customChains);
+    assertDestination(to, customChains);
 
     let finalBuilder = builder
       .from(from)
@@ -309,7 +313,11 @@ export class XTransferService {
 
     try {
       for (const transfer of transfers) {
-        const finalBuilder = this.buildXTransfer(builder, transfer);
+        const finalBuilder = this.buildXTransfer(
+          builder,
+          transfer,
+          options?.customChains,
+        );
         builder = finalBuilder.addToBatch();
       }
 

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ParaSpellError } from '@paraspell/sdk';
@@ -8,6 +9,14 @@ import { describe, expect, it } from 'vitest';
 import { handleXcmApiError } from './error-handler.js';
 
 describe('handleXcmApiError', () => {
+  it('rethrows HttpException instances directly', () => {
+    const error = new BadRequestException('Validation error');
+    const handleError = () => handleXcmApiError(error);
+
+    expect(handleError).toThrow(BadRequestException);
+    expect(handleError).toThrow('Validation error');
+  });
+
   it('throws BadRequestException for ParaSpell errors', () => {
     const handleError = () =>
       handleXcmApiError(new ParaSpellError('SDK error'));

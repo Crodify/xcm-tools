@@ -894,6 +894,64 @@ describe('XTransferService', () => {
         'transfer',
       );
     });
+
+    it('should allow custom chains defined in top-level options for batch transfers', async () => {
+      const customChainName = 'MyCustomChain';
+      const batchDto = {
+        transfers: [
+          {
+            from: customChainName,
+            to: 'Polkadot',
+            recipient,
+            currency,
+          },
+        ],
+        options: {
+          customChains: {
+            [customChainName]: {} as any,
+          },
+        },
+      } as unknown as BatchXTransferDto;
+
+      const result = await service.generateBatchXcmCall(batchDto);
+      expect(result).toBe(txHashBatch);
+      expect(builderMock.from).toHaveBeenCalledWith(customChainName);
+      expect(builderMock.to).toHaveBeenCalledWith('Polkadot');
+    });
+
+    it('should throw BadRequestException when origin chain is unknown in batch transfer', async () => {
+      const batchDto = {
+        transfers: [
+          {
+            from: 'UnknownChain',
+            to: 'Polkadot',
+            recipient,
+            currency,
+          },
+        ],
+      } as unknown as BatchXTransferDto;
+
+      await expect(service.generateBatchXcmCall(batchDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException when destination chain is unknown in batch transfer', async () => {
+      const batchDto = {
+        transfers: [
+          {
+            from: 'Acala',
+            to: 'UnknownDestination',
+            recipient,
+            currency,
+          },
+        ],
+      } as unknown as BatchXTransferDto;
+
+      await expect(service.generateBatchXcmCall(batchDto)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
   });
 
   describe('getBridgeStatus', () => {
